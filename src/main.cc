@@ -162,6 +162,7 @@ int main(int argc, char **argv)
 	//--- Llenado Paralelo ---//
 	auto vectorLineal = new uint32_t[totalElementos];
 	auto vectorLineal1 = new uint32_t[totalElementos];
+
 	start = std::chrono::system_clock::now();
 	
 	#pragma omp parallel for  num_threads(numThreads)
@@ -173,10 +174,13 @@ int main(int argc, char **argv)
 	auto TotalTimeOpenMPParallel = elapsed.count();
 
 	//--- Llenado Serial ---//
+
+	std::vector<uint32_t> vectorLineal3;
+
 	start = std::chrono::system_clock::now();
 	#pragma omp parallel for  num_threads(1)
 	for(size_t i = 0; i < totalElementos; ++i){	
-		vectorLineal1[i] = vRandom[i];
+		vectorLineal3.push_back(vRandom[i]);
 	}
 	end     = std::chrono::high_resolution_clock::now(); 
 	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -201,7 +205,7 @@ int main(int argc, char **argv)
 	start = std::chrono::system_clock::now();
 	#pragma omp parallel for reduction(+:acumulableS) num_threads(1)
 	for(size_t i = 0; i < totalElementos; ++i){
-			acumulableS += vectorLineal1[i];
+			acumulableS += vectorLineal3[i];
 		}
 	end     = std::chrono::high_resolution_clock::now(); 
 	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
