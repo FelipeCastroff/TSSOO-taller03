@@ -4,13 +4,15 @@
 #include <vector>
 #include <time.h>
 #include <stdlib.h>
+#include <iostream>
+#include <omp.h>
 
 uint64_t *Array = nullptr;
 uint32_t sum = 0;
 uint32_t sumTotalParalelo;
 uint32_t *vRandom = nullptr;
 uint64_t *ArregloMa = nullptr;
-uint32_t *llenado_Serial2 = nullptr;
+//uint32_t *llenado_Serial2 = nullptr;
 bool verbosidad;
 
 void sumaParcial(size_t start, size_t end, uint32_t sum, size_t j)
@@ -38,6 +40,7 @@ int main(int argc, char **argv)
 	uint64_t l_superior;
 	uint32_t suma_Serial = 0;
 	uint32_t sum;
+	uint32_t th_id;
 
 	auto argumentos = (std::shared_ptr<checkArgs>)new checkArgs(argc, argv);
 
@@ -57,7 +60,7 @@ int main(int argc, char **argv)
 	std::vector<std::thread *> sumaP_thread;
 	std::vector<uint32_t> llenado_Serial;
 
-	llenado_Serial2 = new uint32_t[totalElementos];
+	//llenado_Serial2 = new uint32_t[totalElementos];
 	Array = new uint64_t[totalElementos];
 	vRandom = new uint32_t[totalElementos];
 	ArregloMa = new uint64_t[numThreads];
@@ -74,7 +77,7 @@ int main(int argc, char **argv)
 		//std::cout << "Numero random:  " << number << std::endl;
 	}
 
-	//-----------------------------------------Primer Módulo-----------------------------------------//
+	//-----------------------------------------Llenado-----------------------------------------//
 
 			// -- Llenado paralelo -- //
 
@@ -104,7 +107,7 @@ int main(int argc, char **argv)
 	for (size_t i = 0; i < totalElementos; i++)
 	{
 
-		llenado_Serial2[i]=(vRandom[i]);
+		llenado_Serial.push_back(vRandom[i]);
 
 	}
 
@@ -112,7 +115,7 @@ int main(int argc, char **argv)
 	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	auto TotalTimeSerialFilling = elapsed.count();
 
-	//-----------------------------------------Segundo Módulo-----------------------------------------//
+	//-----------------------------------------Suma-----------------------------------------//
 	
 			// -- Suma paralelo -- //
 
@@ -145,7 +148,7 @@ int main(int argc, char **argv)
 
 	for (size_t i = 0; i < totalElementos; ++i)
 	{
-		suma_Serial += llenado_Serial2[i];
+		suma_Serial += llenado_Serial[i];
 	}
 
 	end     = std::chrono::high_resolution_clock::now(); 
@@ -154,48 +157,69 @@ int main(int argc, char **argv)
 	
 	//-----------------------------------------Módulo OpenMP-----------------------------------------//
 
-	auto vectorLineal = new uint32_t[totalElementos];
+	// ------------- Módulo Llenado OpenMp ------------- //
 
+	//--- Llenado Paralelo ---//
+	auto vectorLineal = new uint32_t[totalElementos];
+	auto vectorLineal1 = new uint32_t[totalElementos];
 	start = std::chrono::system_clock::now();
 	
 	#pragma omp parallel for  num_threads(numThreads)
 	for(size_t i = 0; i < totalElementos; ++i){	
 		vectorLineal[i] = vRandom[i];
 	}
-	
+	end     = std::chrono::high_resolution_clock::now(); 
+	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+	auto TotalTimeOpenMPParallel = elapsed.count();
+
+	//--- Llenado Serial ---//
+	start = std::chrono::system_clock::now();
+	#pragma omp parallel for  num_threads(1)
+	for(size_t i = 0; i < totalElementos; ++i){	
+		vectorLineal1[i] = vRandom[i];
+	}
 	end     = std::chrono::high_resolution_clock::now(); 
 	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	auto TotalTimeOpenMPFilling = elapsed.count();
 
-	
-	uint32_t acumulable = 0;
 
+	// ------------- Módulo Suma OpenMp ------------- //
+
+	// --- Suma Paralelo ---//
+	uint32_t acumulableP = 0;
 	start = std::chrono::system_clock::now();
-	#pragma omp parallel for reduction(+:acum) num_threads(numThreads)
+	#pragma omp parallel for reduction(+:acumulableP) num_threads(numThreads)
 	for(size_t i = 0; i < totalElementos; ++i){
-		acumulable += vectorLineal[i];
+		acumulableP += vectorLineal[i];
 	}
-	
 	end     = std::chrono::high_resolution_clock::now(); 
 	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-	auto TotalTimeOpenMPsum = elapsed.count();
+	auto TotalTimeOpenMPsumP = elapsed.count();
+
+	// --- Suma Serial --- //
+	uint32_t acumulableS = 0;
+	start = std::chrono::system_clock::now();
+	#pragma omp parallel for reduction(+:acumulableS) num_threads(1)
+	for(size_t i = 0; i < totalElementos; ++i){
+			acumulableS += vectorLineal1[i];
+		}
+	end     = std::chrono::high_resolution_clock::now(); 
+	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+	auto TotalTimeOpenMPsumS = elapsed.count();
 
 	// -- Resultados -- //
 	if(verbosidad){
 	std::cout << "======Resultados======" << std::endl;
-	std::cout << "La suma Total secuencial: " << suma_Serial << std::endl;
-	std::cout << "La suma Total thread: " << sum << std::endl;
-	std::cout << "La suma Total OpenMP:	" << acumulable << std::endl;
-	}
+	std::cout << "La suma Total secuencial			: " << suma_Serial << std::endl;
+	std::cout << "La suma Total thread				: " << sum << std::endl;
+	std::cout << "La suma Total OpenMP Parallel 	: " << acumulableP << std::endl;
+	std::cout << "La suma total OpenMP Serial 		: " << acumulableS << std::endl;
 	std::cout << "====Llenado arreglo====" << std::endl;
-	std::cout << "Tiempo Threads		: " << TotalTimeParallelFilling << "[ms]" << std::endl;
-	std::cout << "Tiempo secuencial 	: " << TotalTimeSerialFilling << "[ms]" <<std::endl;
-	std::cout << "Tiempo OpenMP			: " << TotalTimeOpenMPFilling << "[ms]" << std::endl;
+	std::cout << "Tiempo Threads					: " << TotalTimeParallelFilling << "[ms]" << std::endl;
+	std::cout << "Tiempo secuencial 				: " << TotalTimeSerialFilling << "[ms]" <<std::endl;
 	std::cout << "====Suma valores====" << std::endl;
-	std::cout << "Tiempo threads		: " <<  TotalTimeParallelSum << "[ms]" << std::endl;
-	std::cout << "Tiempo secuencial 	: " <<  TotalTimeSerialSum << "[ms]" << std::endl;
-	std::cout << "Tiempo OpenMP			: " << 	TotalTimeOpenMPsum << "[ms]" << std::endl;
-	
+	std::cout << "Tiempo threads					: " <<  TotalTimeParallelSum << "[ms]" << std::endl;
+	std::cout << "Tiempo secuencial 				: " <<  TotalTimeSerialSum << "[ms]" << std::endl;
 	if(totalElementos > 10000000){
 		float speedUpF = (TotalTimeSerialFilling/TotalTimeParallelFilling);
   		float eficienciadF = 1/(1+(TotalTimeParallelFilling/TotalTimeSerialFilling));
@@ -214,5 +238,15 @@ int main(int argc, char **argv)
 		float speedUp=0;
 		float eficiencia=0;
 		}
+	}
+	std::cout << "=======Módulo OpenMP=======" << std::endl;
+	std::cout << "====Llenado arreglo====" << std::endl;
+	std::cout << "Tiempo OpenMP	secuencial			: " << TotalTimeOpenMPFilling << "[ms]" << std::endl;
+	std::cout << "Tiempo OpenMp parallel				: " << TotalTimeOpenMPParallel << "[ms]" << std::endl;
+	std::cout << "====Suma valores====" << std::endl;
+	std::cout << "Tiempo OpenMP	secuencial			: " << 	TotalTimeOpenMPsumS << "[ms]" << std::endl;
+	std::cout << "Tiempo OpenMP parallel 				: " << TotalTimeOpenMPsumP << "[ms]" <<std::endl;
+	
+	
 	return (EXIT_SUCCESS);
 }
