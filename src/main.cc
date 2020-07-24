@@ -7,7 +7,6 @@
 #include <iostream>
 #include <omp.h>
 
-uint32_t sumTotalParalelo;
 uint32_t *vRandom = nullptr;
 bool verbosidad;
 
@@ -33,10 +32,8 @@ int main(int argc, char **argv)
 	std::cout << "Límite inferior rango aleatorio : " << l_inferior << std::endl;
 	std::cout << "Límite superior rango aleatorio : " << l_superior << std::endl;
 	}
-
-	std::vector<uint32_t> llenado_Serial;
+	
 	vRandom = new uint32_t[totalElementos];
-
 	// ----- Llenar arreglo con random ---- //
 
 	std::random_device deviceV;
@@ -48,27 +45,25 @@ int main(int argc, char **argv)
 		vRandom[i]= number;
 		//std::cout << "Numero random:  " << number << std::endl;
 	}
-	auto vectorLineal1 = new uint32_t[totalElementos];
+	auto vectorSerial = new uint32_t[totalElementos];
 	// -- Llenado serial -- //
-	auto start = std::chrono::system_clock::now();
 
+	auto start = std::chrono::system_clock::now();
 	for (size_t i = 0; i < totalElementos; i++)
 	{
-		vectorLineal1[i]=(vRandom[i]);
+		vectorSerial[i]=(vRandom[i]);
 	}
-
 	auto end     = std::chrono::high_resolution_clock::now(); 
 	auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	auto TotalTimeSerialFilling = elapsed.count();
 
 	// -- Suma Serial -- //
-	start = std::chrono::system_clock::now();
 
+	start = std::chrono::system_clock::now();
 	for (size_t i = 0; i < totalElementos; ++i)
 	{
-		suma_Serial += vectorLineal1[i];
+		suma_Serial += vectorSerial[i];
 	}
-
 	end     = std::chrono::high_resolution_clock::now(); 
 	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	auto TotalTimeSerialSum = elapsed.count();
@@ -76,14 +71,12 @@ int main(int argc, char **argv)
 	//-----------------------------------------Módulo OpenMP-----------------------------------------//
 	// ------------- Módulo Llenado OpenMp ------------- //
 	//--- Llenado Paralelo ---//
-	auto vectorLineal = new uint32_t[totalElementos];
-	
-
+	auto vectorOmp = new uint32_t[totalElementos];
 	start = std::chrono::system_clock::now();
 	
 	#pragma omp parallel for  num_threads(numThreads)
 	for(size_t i = 0; i < totalElementos; ++i){	
-		vectorLineal[i] = vRandom[i];
+		vectorOmp[i] = vRandom[i];
 	}
 	end     = std::chrono::high_resolution_clock::now(); 
 	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -95,7 +88,7 @@ int main(int argc, char **argv)
 	start = std::chrono::system_clock::now();
 	#pragma omp parallel for reduction(+:acumulableP) num_threads(numThreads)
 	for(size_t i = 0; i < totalElementos; ++i){
-		acumulableP += vectorLineal[i];
+		acumulableP += vectorOmp[i];
 	}
 	end     = std::chrono::high_resolution_clock::now(); 
 	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
