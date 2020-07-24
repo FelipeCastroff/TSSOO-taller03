@@ -48,13 +48,13 @@ int main(int argc, char **argv)
 		vRandom[i]= number;
 		//std::cout << "Numero random:  " << number << std::endl;
 	}
-
+	auto vectorLineal1 = new uint32_t[totalElementos];
 	// -- Llenado serial -- //
 	auto start = std::chrono::system_clock::now();
 
 	for (size_t i = 0; i < totalElementos; i++)
 	{
-		llenado_Serial.push_back(vRandom[i]);
+		vectorLineal1[i]=(vRandom[i]);
 	}
 
 	auto end     = std::chrono::high_resolution_clock::now(); 
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 
 	for (size_t i = 0; i < totalElementos; ++i)
 	{
-		suma_Serial += llenado_Serial[i];
+		suma_Serial += vectorLineal1[i];
 	}
 
 	end     = std::chrono::high_resolution_clock::now(); 
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 	// ------------- Módulo Llenado OpenMp ------------- //
 	//--- Llenado Paralelo ---//
 	auto vectorLineal = new uint32_t[totalElementos];
-	auto vectorLineal1 = new uint32_t[totalElementos];
+	
 
 	start = std::chrono::system_clock::now();
 	
