@@ -8,7 +8,6 @@
 #include <omp.h>
 
 uint64_t *Array = nullptr;
-uint32_t sum = 0;
 uint32_t sumTotalParalelo;
 uint32_t *vRandom = nullptr;
 uint64_t *ArregloMa = nullptr;
