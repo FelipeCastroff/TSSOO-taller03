@@ -44,7 +44,7 @@ void Llenado(size_t start, size_t end, size_t flag)
 				Array[i] = vRandom[i];
 				break;
 			case 1:
-				LlenadoSerial[i]=vRandom[i];
+				LlenadoSerial[i]= vRandom[i];
 				
 				break;
 		}
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 	
 	start = std::chrono::system_clock::now();
 	
-	Llenado( 0,totalElementos,1 );
+	Llenado( 0,totalElementos,1);
 
 	end     = std::chrono::high_resolution_clock::now(); 
 	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
