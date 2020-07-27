@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 	{
 		sumSerial += LlenadoSerial[i];
 	}*/
-	
+
 	sumaParcial(0, totalElementos, 0, 0);
 
 	end = std::chrono::high_resolution_clock::now();
@@ -196,20 +196,20 @@ int main(int argc, char **argv)
 		std::cout << "======Resultados======" << std::endl;
 		std::cout << "La suma Total secuencial			: " << sumSerial << std::endl;
 		std::cout << "La suma Total thread				: " << sumConsolidada << std::endl;
-		std::cout << "La suma Total OpenMP Parallel 			: " << acumulableOPenMP << std::endl;
+		std::cout << "La suma Total OpenMP 				: " << acumulableOPenMP << std::endl;
 
 		if (totalElementos > 10000000)
 		{
-			float speedUpF = (TiempoLlenadoSerial / TiempoLlenadoThread);
-			float eficienciadF = 1 / (1 + (TiempoLlenadoThread / TiempoLlenadoSerial));
+			double desempeno01 = (TiempoLlenadoThread/TiempoLlenadoOpenMP );
+			double desempeno02 = (TiempoLlenadoSerial/TiempoLlenadoOpenMP );
 
-			float speedUp = (TiempoSumaSerial / TiempoSumaThread);
-			float eficiencia = 1 / (1 + (TiempoSumaThread / TiempoSumaSerial));
+			double desempeno03 = (TiempoSumaThread/TiempoSumaOpenMP);
+			double desempeno04 = (TiempoSumaSerial/TiempoSumaOpenMP);
 			std::cout << "====Desempeño====" << std::endl;
-			std::cout << "SpeedUp Llenado 				: " << speedUpF << "[ms/ms]" << std::endl;
-			std::cout << "Eficiencia Llenado 				: " << eficienciadF << "[1/ms]" << std::endl;
-			std::cout << "SpeedUp Suma 					: " << speedUp << "[ms/ms]" << std::endl;
-			std::cout << "Eficiencia Suma 				: " << eficiencia << "[1/ms]" << std::endl;
+			std::cout << "Llenado OpenMP vs Thread 			: " << desempeno01 << "[ms/ms]" << std::endl;
+			std::cout << "Llenado OpenMP vs Secuencial 			: " << desempeno02 << "[ms/ms]" << std::endl;
+			std::cout << "Suma OpenMP vs Thread 				: " << desempeno03 << "[ms/ms]" << std::endl;
+			std::cout << "Suma OpenMP vs Secuencial			: " << desempeno04 << "[ms/ms]" << std::endl;
 		}
 		else
 		{

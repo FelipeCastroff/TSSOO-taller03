@@ -31,7 +31,7 @@ Junto con lo anterior se agrego un parámetro no obligatorio al final de la form
 
 Dentro del problema planteado se nos solicitó crear dos módulos los cuales se encarguen de distintas tareas por lo tanto el diseño de solución se dividirá en dos sub-secciones, una encargada de almacenar los valores aleatorios en un arreglo base y la otra encargada de sumar aquellos datos de manera paralela.
 
-Es destacable que se generaron dos apartados los cuales son el llenado de manera secuencial, la suma secuencial y la implementación manual de threads del taller dos, esto debido a que utilizaran para comparar los tiempos de ejecución y lograr una gráfica la cual demuestre y respalde el correcto uso de OpenMP y generar un análisis de los resultados.
+Es destacable que se generaron dos apartados los cuales son el llenado de manera secuencial, la suma secuencial y la implementación manual de threads del taller dos, esto debido a que utilizaran para comparar los tiempos de ejecución y lograr una gráfica la cual demuestre y respalde el correcto uso de OpenMP y generar un análisis de los resultados. Además de la comparativa de tiempo de ejecución a realizar también se generó una sección en el código la cual esta destinada al calculo del desempeño generado por OpenMP contra las dos implementaciones con las cuales se compara. Dicha sección muestra cuantas veces es más eficiente la implementación de OpenMP vs. método secuencial vs. método thread(Implementación taller dos).
 
 Cada uno de los módulos y apartados fueron medidos en termino de tiempo de ejecución mediante la función:
 ~~~
@@ -47,7 +47,7 @@ Esta función permite medir el tiempo de ejecución de un determinado código de
 
 ### Módulo uno
 
-En este módulo se implemento un arreglo cuya funcionalidad es almacenar los datos aleatorios generados por la función **std::random_device** para luego a través de OpenMP almacenarlos de manera paralela con una cantidad ***n*** de hilos, estos hilos dependen únicamente de los parámetros de entrada. La API se encarga de paralelizar el código encargado de llenar el arreglo base con los datos aleatorios, mediante la ejecución fork-join().
+En este módulo se implemento un arreglo cuya funcionalidad es almacenar los datos aleatorios generados por la función **std::random_device** para luego a través de OpenMP almacenarlos de manera paralela con una cantidad ***n*** de hilos, estos hilos dependen únicamente de los parámetros de entrada. La API se encarga de paralelizar el código encargado de llenar el arreglo base con los datos aleatorios, mediante la ejecución de un módelo fork-join().
 
 ### Módulo dos
 
